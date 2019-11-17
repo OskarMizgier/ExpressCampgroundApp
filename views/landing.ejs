@@ -1,14 +1,25 @@
 <% include partials/header %>
+<style>
+	body {
+		 background: #0F2027;  /* fallback for old browsers */
+background: -webkit-linear-gradient(to right, #2C5364, #203A43, #0F2027);  /* Chrome 10-25, Safari 5.1-6 */
+background: linear-gradient(to right, #2C5364, #203A43, #0F2027); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 
-
-<h1>
+	}
+</style>
+<h1 class='display-2 text-center mt-5 text-light'>
 	Landing Page!
 </h1>
 
-<p>
+<h2 class='display-3 text-center mt-5 text-light'>
 	Welcome to Yelp Camp!
-</p>
-
-<a href='/campgrounds'>View all campgrounds</a>
+</h2>
+<div class='text-center mt-5 mb-5'>
+	<form method="get" action="/campgrounds">
+	<button class='btn btn-primary'>
+		View all Campgrounds
+	</button>
+	</form>
+</div>
 
 <% include partials/footer %>
