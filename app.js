@@ -12,13 +12,15 @@ mongoose.connect('mongodb://localhost:27017/yelp_camp', {useNewUrlParser: true, 
 var campgroundSchema = new mongoose.Schema({
 	name: String,
 	image: String,
+	description: String,
 })
 
 var Campground = mongoose.model('Campground', campgroundSchema);
-// Schema setup done
+//Schema setup done
 //Create a new -------------------------------------------- 
 // Campground.create({name: 'Mateusz', 
-// 				   image: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1267&q=80'
+// 				   image: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1267&q=80',
+// 				   description: 'This is a huge campground located in Poland. Great bathrooms, very close to the sea, amazing views. Really high recommended'
 // 				  }, function (err, campground){
 // 	if(err){
 // 		console.log(err)
@@ -52,21 +54,34 @@ app.get('/campgrounds', function (req, res){
 		if(err){
 			console.log(err)
 		} else {
-			res.render('campgrounds', {campgrounds: allCampgrounds})
+			res.render('index', {campgrounds: allCampgrounds})
 		}
 	})
 	
 	//res.render('campgrounds', {campGrounds: campGrounds})
 })
 
-app.get('/campgrounds/new', function (req, res){
+	app.get('/campgrounds/new', function (req, res){
 	res.render('new')
 })
+
+	//Show more info about campground
+app.get('/campgrounds/:id', function (req, res){
+		Campground.findById(req.params.id, function (err, foundCampground){
+			if(err){
+				console.log(err);
+			} else {
+				res.render('show', {campground: foundCampground})
+			}
+		})
+})
+
 
 app.post('/campgrounds', function (req, res){
 	var formName = req.body.name
 	var imageUrl = req.body.image
-	var newCampGround = {name: formName, image: imageUrl}
+	var CampDescription = req.body.description
+	var newCampGround = {name: formName, image: imageUrl, description: CampDescription}
 	Campground.create(newCampGround, function(err, newlyCreated){
 		if(err){
 			console.log(err)
@@ -79,7 +94,7 @@ app.post('/campgrounds', function (req, res){
 	// Get data from form and add to campgrounds arr
 	//redirect back to campgrounds page
 	//res.redirect('/campgrounds')
-})
+});
 
 
 //Tel express to listen for requests - start server
