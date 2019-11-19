@@ -9,9 +9,11 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local');
 var passportLocalMongoose = require('passport-local-mongoose');
 var User = require('./models/user')
+var methodOverride = require('method-override')
+var flash = require('connect-flash');
 
 //Remove all campgrounds each time we restart the server
-seedDB();
+// seedDB();
 //Adding mongoose
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/yelp_camp', {useNewUrlParser: true, useUnifiedTopology: true});
@@ -27,6 +29,8 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(methodOverride('_method'));
+app.use(flash());
 
 
 
@@ -37,6 +41,8 @@ app.use(express.static(__dirname + '/public'))
 //Middleware to pass Currentuser to all routes
 app.use(function(req, res, next){
    res.locals.currentUser = req.user;
+	  res.locals.success = req.flash('success');
+	res.locals.error = req.flash('error');
    next();
 });
 
@@ -82,11 +88,15 @@ app.get('/campgrounds/:id', function (req, res){
 
 
 app.post('/campgrounds', isLoggedIn, function (req, res){
-	var formName = req.body.name
-	var imageUrl = req.body.image
-	var CampDescription = req.body.description
-	var newCampGround = {name: formName, image: imageUrl, description: CampDescription}
-	Campground.create(newCampGround, function(err, newlyCreated){
+	 var name = req.body.name;
+    var image = req.body.image;
+    var desc = req.body.description;
+    var author = {
+        id: req.user._id,
+        username: req.user.username
+    }
+    var newCampground = {name: name, image: image, description: desc, author:author}
+	Campground.create(newCampground, function(err, newlyCreated){
 		if(err){
 			console.log(err)
 		} else {
@@ -99,13 +109,21 @@ app.post("/campgrounds/:id", function(req, res){
    //lookup campground using ID
    Campground.findById(req.params.id, function(err, campground){
        if(err){
-           console.log(err);git 
+           console.log(err) 
            res.redirect("/campgrounds");
        } else {
+		   //Add username and id to comment
+		   
+		   //save comment
         Comment.create(req.body.comment, function(err, comment){
            if(err){
                console.log(err);
            } else {
+			    //add username and id to comment
+               comment.author.id = req.user._id;
+               comment.author.username = req.user.username;
+               //save comment
+               comment.save();
                campground.comments.push(comment);
                campground.save();
                res.redirect('/campgrounds/' + campground._id);
@@ -140,7 +158,7 @@ app.post("/register", function(req, res){
 
 //LOGIN FORM
 app.get('/login', function (req, res){
-	res.render('login')
+	res.render('login', {message: req.flash('error')})
 })
 //HANDLE LOGIN
 app.post("/login", passport.authenticate("local", 
@@ -153,6 +171,7 @@ app.post("/login", passport.authenticate("local",
 //LOGOUT
 app.get("/logout", function(req, res){
    req.logout();
+	req.flash('success', 'You have been successfully logged out')
    res.redirect("/campgrounds");
 });
 
@@ -161,6 +180,7 @@ function isLoggedIn(req, res, next){
     if(req.isAuthenticated()){
         return next();
     }
+	req.flash('error', 'Please login first')
     res.redirect("/login");
 }
 

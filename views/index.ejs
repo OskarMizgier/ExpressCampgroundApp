@@ -1,5 +1,9 @@
 <% include partials/header %>
-
+	<% if(success && success.length > 0) {%>
+	<div class="alert alert-success" role="alert">
+  <p><%= success %></p>
+</div>
+<%}%>
 
 
 
