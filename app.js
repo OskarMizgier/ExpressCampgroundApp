@@ -2,48 +2,31 @@
 var express = require('express');
 var app 	= express();
 var bodyParser= require('body-parser');
+var Campground = require('./models/campground')
+var seedDB = require('./seeds');
+var Comment = require('./models/comment');
 
+//Remove all campgrounds each time we restart the server
+seedDB();
 //Adding mongoose
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/yelp_camp', {useNewUrlParser: true, useUnifiedTopology: true});
 
 
-//Schema Setup Mongoose
-var campgroundSchema = new mongoose.Schema({
-	name: String,
-	image: String,
-	description: String,
-})
-
-var Campground = mongoose.model('Campground', campgroundSchema);
-//Schema setup done
-//Create a new -------------------------------------------- 
-// Campground.create({name: 'Mateusz', 
-// 				   image: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1267&q=80',
-// 				   description: 'This is a huge campground located in Poland. Great bathrooms, very close to the sea, amazing views. Really high recommended'
-// 				  }, function (err, campground){
-// 	if(err){
-// 		console.log(err)
-// 	} else {
-// 		console.log ('Newly created CAMPGROUND!')
-// 		console.log(campground)
-// 	}
-// });
-
-// --------------------------------------------
-
-	// var campGrounds = [
-	// 	{name: 'Oskar', image: 'https://images.unsplash.com/photo-1532339142463-fd0a8979791a?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80'},
-	// 	{name: 'Mateusz', image: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1267&q=80'},
-	// 	{name: 'Michal', image: 'https://images.unsplash.com/photo-1508873696983-2dfd5898f08b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80'},
-	// 	{name: 'Lukasz', image: 'https://images.unsplash.com/photo-1517824806704-9040b037703b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80'},
-	// ]
-
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('view engine', 'ejs');
+app.use(express.static(__dirname + '/public'))
+
+
+
+
 
 // ------------------------ROUTES -------------------------------
+
+
+
+
 app.get('/', function (req, res){
 	res.render('landing')
 });
@@ -67,10 +50,11 @@ app.get('/campgrounds', function (req, res){
 
 	//Show more info about campground
 app.get('/campgrounds/:id', function (req, res){
-		Campground.findById(req.params.id, function (err, foundCampground){
+		Campground.findById(req.params.id).populate('comments').exec(function (err, foundCampground){
 			if(err){
 				console.log(err);
 			} else {
+				console.log(foundCampground)
 				res.render('show', {campground: foundCampground})
 			}
 		})
@@ -89,11 +73,29 @@ app.post('/campgrounds', function (req, res){
 			res.redirect('/campgrounds')
 		}
 	})
-	
-	// campGrounds.push(newCampGround)
-	// Get data from form and add to campgrounds arr
-	//redirect back to campgrounds page
-	//res.redirect('/campgrounds')
+});
+
+app.post("/campgrounds/:id", function(req, res){
+   //lookup campground using ID
+   Campground.findById(req.params.id, function(err, campground){
+       if(err){
+           console.log(err);git 
+           res.redirect("/campgrounds");
+       } else {
+        Comment.create(req.body.comment, function(err, comment){
+           if(err){
+               console.log(err);
+           } else {
+               campground.comments.push(comment);
+               campground.save();
+               res.redirect('/campgrounds/' + campground._id);
+           }
+        });
+       }
+   });
+   //create new comment
+   //connect new comment to campground
+   //redirect campground show page
 });
 
 
