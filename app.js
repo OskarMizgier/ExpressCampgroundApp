@@ -185,6 +185,6 @@ function isLoggedIn(req, res, next){
 }
 
 //Tel express to listen for requests - start server
-.listen(process.env.PORT || 5000, function (){
+app.listen(process.env.PORT || 5000, function (){
 	console.log('App is running!')
 })
