@@ -75,7 +75,7 @@ app.get('/campgrounds', function (req, res){
 })
 
 	//Show more info about campground
-app.get('/campgrounds/:id', function (req, res){
+app.get('/campgrounds/:id',isLoggedIn, function (req, res){
 		Campground.findById(req.params.id).populate('comments').exec(function (err, foundCampground){
 			if(err){
 				console.log(err);
