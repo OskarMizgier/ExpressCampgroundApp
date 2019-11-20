@@ -16,8 +16,8 @@ var flash = require('connect-flash');
 // seedDB();
 //Adding mongoose
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/yelp_camp', {useNewUrlParser: true, useUnifiedTopology: true});
-
+//mongoose.connect('mongodb://localhost:27017/yelp_camp', {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect('mongodb+srv://altuzz:Magister66@cluster0-tpep3.mongodb.net/test?retryWrites=true&w=majority', {useNewUrlParser: true, useUnifiedTopology: true});
 app.use(require('express-session')({
 	secret: 'Tygryszak',
 	resave: false,
